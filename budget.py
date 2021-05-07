@@ -67,26 +67,28 @@ class Category:
 
 
 def create_spend_chart(categories) -> str:
-    withdraws_list = [get_total_withdraw(
+    '''
+    Returns a string representation of the `categories` spends.
+
+    '''
+    withdraws_list = [get_withdrawals_sum(
         category.ledger) for category in categories]
     withdraws_sum = sum(withdraws_list)
     withdraws_list_percentage = [get_percentage(
         withdraws_sum, category_withdraw) for category_withdraw in withdraws_list]
 
     s = 'Percentage spent by category\n'
+    # it draws the bar chart with label 0 - 100
     for label in range(100, -10, -10):
         s += f'{label:>3}|'
         for percentage in withdraws_list_percentage:
             symbol = get_circle(percentage, label)
             s += symbol
-
         s += ' \n'
-
     s += '    ' + '---' * len(categories) + '-\n'
 
-    categories_name_len = [len(category.name) for category in categories]
-    longest_name_cat = max(categories_name_len)
-
+    # it draws the category names
+    longest_name_cat = get_max_length(categories)
     for i in range(longest_name_cat):
         s += '    '
         for category in categories:
@@ -96,7 +98,7 @@ def create_spend_chart(categories) -> str:
     return s
 
 
-def get_character(index, name):
+def get_character(index, name) -> str:
     '''
     Returns the character in form ' F ' from `name` at given `index`, 
     otherwise returns 3 whitespaces.
@@ -108,73 +110,24 @@ def get_circle(amount, label) -> str:
     return ' o ' if amount >= label else '   '
 
 
-def get_total_withdraw(ledger_list):
-    total = 0
+def get_withdrawals_sum(ledger_list) -> float:
+    withdrawals = 0
     for item in ledger_list:
         if item['amount'] < 0:
-            total += abs(item['amount'])
-    return total
+            withdrawals += abs(item['amount'])
+    return withdrawals
 
 
-def get_percentage(total, rate):
+def get_percentage(total, rate) -> float:
     '''
     Returns the percentage of `rate` in relation to `total`.
     '''
-    percentage = (rate * 100) / total
-    return percentage
+    return (rate * 100) / total
 
 
-# \n
-# 100|          \n
-#  90|          \n
-#  80|          \n
-#  70|    o     \n
-#  60|    o     \n
-#  50|    o     \n
-#  40|    o     \n
-#  30|    o     \n
-#  20|    o  o  \n
-#  10|    o  o  \n
-#   0| o  o  o  \n
-#     ----------\n
-#      B  F  E  \n
-#      u  o  n  \n
-#      s  o  t  \n
-#      i  d  e  \n
-#      n     r  \n
-#      e     t  \n
-#      s     a  \n
-#      s     i  \n
-#            n  \n
-#            m  \n
-#            e  \n
-#            n  \n
-#            t
-
-
-# 'Percentage spent by category\n
-# 100|         \n
-#  90|         \n
-#  80|         \n
-#  70|    o    \n
-#  60|    o    \n
-#  50|    o    \n
-#  40|    o    \n
-#  30|    o    \n
-#  20|    o  o \n
-#  10|    o  o \n
-#   0| o  o  o \n
-#    ----------\n
-#      B  F  E \n
-#      u  o  n \n
-#      s  o  t \n
-#      i  d  e \n
-#      n     r \n
-#      e     t \n
-#      s     a \n
-#      s     i \n
-#            n \n
-#            m \n
-#            e \n
-#            n \n
-#            t \n
+def get_max_length(categories):
+    '''
+    Returns the maximum length from the `categories` list.
+    '''
+    categories_name_len = [len(category.name) for category in categories]
+    return max(categories_name_len)
